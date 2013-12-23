@@ -18,8 +18,10 @@ module Rake::DSL
           begin
             conn.create_table table_name, &block
             model = Class.new(ActiveRecord::Base) { self.table_name = table_name }
+            args[:csv] ||= {}
+            args[:csv][:headers] ||= model.column_names.reject{|c|%w(id created_at updated_at).include? c}
             common_columns = model.column_names & args[:csv][:headers]
-            csv = CSV::Stream.new input, args[:csv]||{}
+            csv = CSV::Stream.new input, args[:csv]
 
             TableUtils::Progress.bar total: csv.count do |bar|
               batch = []
