@@ -18,25 +18,29 @@ describe "Rake::DSL.table_import" do
   before(:each) do
     Rake.application = rake
     logger.level = Logger::UNKNOWN
-    table_import :planets => fixture("table.csv"),
-      csv: { headers: %w(planet earth_masses jupiter_masses) } do |t|
-      t.string :planet
-      t.float :earth_masses
-      t.float :jupiter_masses
+  end
+
+  context "with explicit csv headers" do
+    before(:each) do
+      table_import :planets => fixture("table.csv"),
+        csv: { headers: %w(planet earth_masses jupiter_masses) } do |t|
+        t.string :planet
+        t.float :earth_masses
+        t.float :jupiter_masses
+      end
     end
-  end
+    it "imports a table" do
+      expect( conn.table_exists? :planets ).to be_false
+      rake[:planets].invoke
+      expect( conn.table_exists? :planets ).to be_true
+      expect( model.column_names ).to match_array planet_headers + %w(id)
+      expect( records_without_id ).to match_array planets_table
+    end
 
-  it "imports a table" do
-    expect( conn.table_exists? :planets ).to be_false
-    rake[:planets].invoke
-    expect( conn.table_exists? :planets ).to be_true
-    expect( model.column_names ).to match_array planet_headers + %w(id)
-    expect( records_without_id ).to match_array planets_table
-  end
-
-  it "cleans up on errors" do
-    ActiveRecord::Base.stub(:import) { raise RuntimeError.new "oops" }
-    expect { rake[:planets].invoke }.to raise_error
-    expect( conn.table_exists? :planets ).to be_false
+    it "cleans up on errors" do
+      ActiveRecord::Base.stub(:import) { raise RuntimeError.new "oops" }
+      expect { rake[:planets].invoke }.to raise_error
+      expect( conn.table_exists? :planets ).to be_false
+    end
   end
 end
