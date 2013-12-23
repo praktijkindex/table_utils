@@ -17,6 +17,7 @@ describe "Rake::DSL.table_import" do
 
   before(:each) do
     Rake.application = rake
+    logger.level = Logger::UNKNOWN
     table_import :planets => fixture("table.csv"),
       csv: { headers: %w(planet earth_masses jupiter_masses) } do |t|
       t.string :planet

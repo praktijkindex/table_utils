@@ -2,6 +2,7 @@ require "active_record"
 require "activerecord-import"
 require "csv/stream"
 require "table_utils/progress"
+require "rake/logger"
 
 module Rake::DSL
   def table_import args, &block
@@ -13,7 +14,7 @@ module Rake::DSL
 
       unless conn.table_exists? table_name
         conn.transaction do
-          puts "Importing #{table_name} from #{input}"
+          logger.info "Importing #{table_name} from #{input}"
           begin
             conn.create_table table_name, &block
             model = Class.new(ActiveRecord::Base) { self.table_name = table_name }
@@ -44,7 +45,7 @@ module Rake::DSL
 
           rescue
             if conn.table_exists? table_name
-              puts "dropping #{table_name} due to errors during import"
+              logger.warn "dropping #{table_name} due to errors during import"
               conn.drop_table table_name
             end
             raise

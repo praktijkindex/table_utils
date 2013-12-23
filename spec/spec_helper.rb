@@ -20,3 +20,4 @@ shared_context "silent_progress" do
   let(:dummy_io) { StringIO.new }
   before(:each) { ProgressBar::Base.any_instance.stub(:output) { dummy_io } }
 end
+
