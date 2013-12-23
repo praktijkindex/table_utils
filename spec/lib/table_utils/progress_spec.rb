@@ -3,6 +3,8 @@ require "table_utils/progress"
 include TableUtils
 
 describe Progress do
+  include_context "silent_progress"
+
   describe "::bar" do
     context "without block" do
       subject { Progress.bar }
@@ -10,9 +12,12 @@ describe Progress do
     end
 
     context "with block" do
-      Progress.bar do |bar|
-        subject { bar }
-        it { should be_a ProgressBar::Base }
+      it "should yield a ProgressBar::Base instance" do
+        yielded = nil
+        Progress.bar do |bar|
+          yielded = bar
+        end
+        expect( yielded ).to be_a ProgressBar::Base
       end
     end
   end
@@ -21,7 +26,7 @@ describe Progress do
     let(:enum) { [:foo,:bar] }
     let(:yielded) { [] }
     it "iterates over supplied enum" do
-      Progress.over enum do |item,bar|
+      Progress.over enum, output: dummy_io do |item,bar|
         expect(bar).to be_a ProgressBar::Base
         expect(bar.total).to eq enum.count
         yielded << item
