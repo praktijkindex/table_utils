@@ -57,4 +57,5 @@ describe "Rake::DSL.table_import" do
     end
     include_examples "imports a table"
   end
+
 end

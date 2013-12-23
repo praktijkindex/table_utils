@@ -25,14 +25,28 @@ module TableUtils
 
     def self.over enum, options = {}
       options = options.dup
-      options[:total] = enum.count unless options.include? :total
+
+      unless options.include? :total
+        options[:total] = enum.count
+      end
+
       Progress.bar options do |bar|
         enum.each do |i|
-          yield i, bar
           bar.increment
+          yield i, bar
         end
       end
     end
 
+  end
+end
+
+require "csv"
+class CSV
+  def count
+    oldpos = tell if respond_to?(:tell)
+    super
+  ensure
+    seek oldpos if respond_to?(:seek)
   end
 end
