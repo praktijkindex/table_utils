@@ -1,3 +1,5 @@
+require "active_record"
+require "activerecord-import"
 require "csv/stream"
 require "table_utils/progress"
 
@@ -7,6 +9,7 @@ module Rake::DSL
 
     task args.extract!(table_name) do |t|
       input = t.prerequisites[0]
+      conn = ActiveRecord::Base.connection
 
       unless conn.table_exists? table_name
         puts "Importing #{table_name} from #{input}"

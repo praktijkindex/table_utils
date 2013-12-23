@@ -1,8 +1,8 @@
 require "csv/stream"
 
 describe CSV::Stream do
+  include_context "planets"
   subject { CSV::Stream.new fixture("table.csv") }
-  let(:planets) { %w[Mercury Venus Earth Mars Jupiter Saturn Uranus Neptune] }
   its(:count) { should == planets.count }
 
   describe "#each" do
