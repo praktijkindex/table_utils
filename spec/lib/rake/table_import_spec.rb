@@ -58,4 +58,15 @@ describe "Rake::DSL.table_import" do
     include_examples "imports a table"
   end
 
+  context "with csv headers from the first row" do
+    before(:each) do
+      table_import :planets => fixture("table.csv"), csv: { headers: :first_row } do |t|
+        t.string :planet
+        t.float :earth_masses
+        t.float :jupiter_masses
+      end
+    end
+    include_examples "imports a table"
+  end
+
 end
