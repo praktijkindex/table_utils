@@ -7,10 +7,12 @@ describe DataSource do
 
   let(:more_args) { [] }
   let(:source) {
-    DataSource.new :planets, fixture("table.csv"), *more_args do |t|
-      t.string :planet
-      t.float :earth_masses
-      t.float :jupiter_masses
+    DataSource.new :planets, fixture("table.csv"), *more_args do
+      define_table do |t|
+        t.string :planet
+        t.float :earth_masses
+        t.float :jupiter_masses
+      end
     end
   }
   before { source.import }

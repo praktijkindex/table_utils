@@ -8,7 +8,7 @@ class DataSource
   def initialize table_name, input_path, csv_opts = {}, &block
     @table_name, @input_path = table_name, input_path
     @csv_opts = csv_opts ? csv_opts.dup : {}
-    @block = block
+    ImportDSL.new self, &block
   end
 
   def import
@@ -32,14 +32,27 @@ class DataSource
 
   private
 
-  attr_reader :csv_opts, :block
+  class ImportDSL
+    attr_reader :source
+
+    def initialize source, &block
+      @source = source
+      instance_eval &block
+    end
+
+    def define_table &block
+      source.send :define_table_proc=, block
+    end
+  end
+
+  attr_accessor :csv_opts, :define_table_proc
 
   def conn
     @conn ||= ActiveRecord::Base.connection
   end
 
   def model
-    conn.create_table table_name, &block unless table_exists?
+    conn.create_table table_name, &define_table_proc unless table_exists?
     _table_name = table_name
     @model ||= Class.new(ActiveRecord::Base) { self.table_name = _table_name }
   end
