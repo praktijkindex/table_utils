@@ -8,12 +8,15 @@ class DataSource
   def initialize table_name, input_path, csv_opts = {}, &block
     @table_name, @input_path = table_name, input_path
     @csv_opts = csv_opts ? csv_opts.dup : {}
+    @transform_record_proc = ->(x) { }
     ImportDSL.new self, &block
   end
 
   def import
     batch = []
     TableUtils::Progress.over csv do |row, bar|
+      transform_record_proc[row]
+      common_columns = model.column_names & row.headers
       batch << common_columns.map{ |c| row[c] }
       if batch.count >= 1000 || bar.finished?
         model.import common_columns, batch, validate: false
@@ -43,9 +46,13 @@ class DataSource
     def define_table &block
       source.send :define_table_proc=, block
     end
+
+    def transform_record &block
+      source.send :transform_record_proc=, block
+    end
   end
 
-  attr_accessor :csv_opts, :define_table_proc
+  attr_accessor :csv_opts, :define_table_proc, :transform_record_proc
 
   def conn
     @conn ||= ActiveRecord::Base.connection
@@ -63,14 +70,8 @@ class DataSource
                csv_opts[:return_headers] = true
                CSV.open(input_path, csv_opts).tap do |csv|
                  csv.shift
-                 @common_columns = model.column_names & csv.headers
                  csv.shift if Array === csv_opts[:headers]
                end
              end
-  end
-
-  def common_columns
-    csv
-    @common_columns
   end
 end
