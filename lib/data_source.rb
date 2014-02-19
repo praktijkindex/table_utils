@@ -22,6 +22,7 @@ class DataSource
         batch = []
       end
     end
+    after_import
   end
 
   def define_table
@@ -29,6 +30,10 @@ class DataSource
   end
 
   def transform_record ignored_record
+
+  end
+
+  def after_import
 
   end
 
@@ -50,7 +55,7 @@ class DataSource
       instance_eval &block
     end
 
-    [:define_table, :transform_record].each do |hook|
+    [:define_table, :transform_record, :after_import].each do |hook|
       define_method hook do |&block|
         source.define_singleton_method hook, block
       end
