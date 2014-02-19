@@ -8,14 +8,13 @@ class DataSource
   def initialize table_name, input_path, csv_opts = {}, &block
     @table_name, @input_path = table_name, input_path
     @csv_opts = csv_opts ? csv_opts.dup : {}
-    @transform_record_proc = ->(x) { }
     ImportDSL.new self, &block
   end
 
   def import
     batch = []
     TableUtils::Progress.over csv do |row, bar|
-      transform_record_proc[row]
+      transform_record row
       common_columns = model.column_names & row.headers
       batch << common_columns.map{ |c| row[c] }
       if batch.count >= 1000 || bar.finished?
@@ -23,6 +22,14 @@ class DataSource
         batch = []
       end
     end
+  end
+
+  def define_table
+    raise "No table definition supplied for #{@table_name}"
+  end
+
+  def transform_record ignored_record
+
   end
 
   def table_exists?
@@ -43,23 +50,23 @@ class DataSource
       instance_eval &block
     end
 
-    def define_table &block
-      source.send :define_table_proc=, block
-    end
-
-    def transform_record &block
-      source.send :transform_record_proc=, block
+    [:define_table, :transform_record].each do |hook|
+      define_method hook do |&block|
+        source.define_singleton_method hook, block
+      end
     end
   end
 
-  attr_accessor :csv_opts, :define_table_proc, :transform_record_proc
+  attr_accessor :csv_opts
 
   def conn
     @conn ||= ActiveRecord::Base.connection
   end
 
   def model
-    conn.create_table table_name, &define_table_proc unless table_exists?
+    conn.create_table table_name do |t|
+      define_table t
+    end unless table_exists?
     _table_name = table_name
     @model ||= Class.new(ActiveRecord::Base) { self.table_name = _table_name }
   end
