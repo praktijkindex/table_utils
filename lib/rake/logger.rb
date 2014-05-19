@@ -1,3 +1,5 @@
+require 'logger'
+
 module Rake::DSL
   attr_writer :logger
 
