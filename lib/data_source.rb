@@ -25,7 +25,7 @@ class DataSource
     after_import
   end
 
-  def define_table
+  def define_table *args
     raise "No table definition supplied for #{@table_name}"
   end
 
