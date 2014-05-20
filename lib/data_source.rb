@@ -11,10 +11,10 @@ class DataSource
     ImportDSL.new self, &block
   end
 
-  def import
+  def import progress_opts = {}
     batch = []
     create_table
-    TableUtils::Progress.over csv do |row, bar|
+    TableUtils::Progress.over csv, progress_opts do |row, bar|
       transform_record row
       common_columns = model.column_names & row.headers
       batch << common_columns.map{ |c| row[c] }
@@ -23,6 +23,11 @@ class DataSource
         batch = []
       end
     end
+    after_import
+  end
+
+  def init_table
+    create_table
     after_import
   end
 
