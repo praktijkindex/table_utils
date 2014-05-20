@@ -13,6 +13,7 @@ class DataSource
 
   def import
     batch = []
+    create_table
     TableUtils::Progress.over csv do |row, bar|
       transform_record row
       common_columns = model.column_names & row.headers
@@ -68,10 +69,13 @@ class DataSource
     @conn ||= ActiveRecord::Base.connection
   end
 
-  def model
+  def create_table
     conn.create_table table_name do |t|
       define_table t
     end unless table_exists?
+  end
+
+  def model
     _table_name = table_name
     @model ||= Class.new(ActiveRecord::Base) { self.table_name = _table_name }
   end
