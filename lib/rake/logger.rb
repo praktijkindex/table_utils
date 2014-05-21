@@ -1,9 +1,19 @@
 require 'logger'
 
 module Rake::DSL
-  attr_writer :logger
+  class << self
+    attr_writer :logger
+
+    def logger
+      @logger ||= Logger.new STDOUT
+    end
+  end
 
   def logger
-    @logger ||= Logger.new STDOUT
+    Rake::DSL.logger
+  end
+
+  def logger= new_logger
+    Rake::DSL.logger= new_logger
   end
 end
