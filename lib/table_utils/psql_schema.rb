@@ -40,10 +40,6 @@ module TableUtils
                               [path[:prepend] , *PsqlSchema.path.split(",")].join(",")
                             end
           yield
-        rescue Exception => e
-          Rails.logger.error e
-          Rails.logger.error e.backtrace.join("\n")
-          throw e
         ensure
           PsqlSchema.path = old_path
         end
