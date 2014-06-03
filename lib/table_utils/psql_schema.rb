@@ -32,6 +32,7 @@ module TableUtils
 
       def with_path path
         begin
+          orig_error = nil
           old_path = PsqlSchema.path
           PsqlSchema.path = case path
                             when String
@@ -40,8 +41,19 @@ module TableUtils
                               [path[:prepend] , *PsqlSchema.path.split(",")].join(",")
                             end
           yield
+        rescue Exception => e
+          orig_error = e
+          raise
         ensure
-          PsqlSchema.path = old_path
+          begin
+            PsqlSchema.path = old_path
+          rescue Exception => e
+            if orig_error
+              raise orig_error
+            else
+              raise
+            end
+          end
         end
       end
     end
