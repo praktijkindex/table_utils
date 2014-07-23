@@ -42,7 +42,7 @@ module TableUtils
                             end
           yield
         rescue Exception => e
-          orig_error = e
+          orig_error ||= e
           raise
         ensure
           begin
