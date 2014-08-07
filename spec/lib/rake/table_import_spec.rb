@@ -7,7 +7,6 @@ describe "Rake::DSL.table_import" do
 
   before(:each) do
     Rake.application = rake
-    logger.level = Logger::UNKNOWN
     task "path"
   end
 

@@ -1,5 +1,4 @@
 require "data_source"
-require "rake/logger"
 
 module Rake::DSL
   def table_import args, &block
