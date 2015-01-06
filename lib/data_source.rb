@@ -22,7 +22,7 @@ class DataSource
         model.import common_columns, batch, validate: false
         batch = []
       end
-    end
+    end if input_path
     after_import
   end
 
